@@ -98,6 +98,12 @@ async def openapi_spec():
         text = text.replace("PLUGIN_HOSTNAME", f"http{s}://{host}")
         return quart.Response(text, mimetype="text/yaml")
 
+@app.get("/")
+async def index():
+    with open("index.html") as f:
+        text = f.read()
+        return quart.Response(text, mimetype="text/html")
+
 
 def main():
     parser = argparse.ArgumentParser()
