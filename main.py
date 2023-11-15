@@ -7,10 +7,16 @@ import quart_cors
 from quart import request
 from loguru import logger
 
+import os
+os.environ["CONTAINER"] = 'docker'
+
 from lean_dojo import *
 
+args_url = "https://github.com/yangky11/lean-example"
+args_commit = "5a0360e49946815cb53132638ccdd46fb1859e2a"
+
 app = quart_cors.cors(quart.Quart(__name__), allow_origin="*")
-repo = None
+repo = LeanGitRepo(args_url, args_commit)
 theorem = None
 dojo = None
 states = dict()
@@ -55,7 +61,7 @@ async def run_tactic():
             "error": "The proof is abandoned because of `sorry`.",
             "proof_finished": False,
         }
-    elif type(s) in (TacticError, TimeoutError):
+    elif type(s) in (LeanError, TimeoutError):
         res = {
             "error": s.error,
             "proof_finished": False,
@@ -76,18 +82,20 @@ async def plugin_logo():
 @app.get("/.well-known/ai-plugin.json")
 async def plugin_manifest():
     host = request.headers["Host"]
+    s = '' if host == 'localhost' else 's'
     with open("manifest.json") as f:
         text = f.read()
-        text = text.replace("PLUGIN_HOSTNAME", f"http://{host}")
+        text = text.replace("PLUGIN_HOSTNAME", f"http{s}://{host}")
         return quart.Response(text, mimetype="text/json")
 
 
 @app.get("/openapi.yaml")
 async def openapi_spec():
     host = request.headers["Host"]
+    s = '' if host == 'localhost' else 's'
     with open("openapi.yaml") as f:
         text = f.read()
-        text = text.replace("PLUGIN_HOSTNAME", f"http://{host}")
+        text = text.replace("PLUGIN_HOSTNAME", f"http{s}://{host}")
         return quart.Response(text, mimetype="text/yaml")
 
 

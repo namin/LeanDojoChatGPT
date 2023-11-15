@@ -1,0 +1,13 @@
+[Unit]
+Description=hypercorn instance to serve LeanDojoChatGPT
+After=network.target
+
+[Service]
+User=namin
+Group=www-data
+WorkingDirectory=/home/namin/LeanDojoChatGPT
+Environment="PATH=/home/namin/LeanDojoChatGPT/leanenv/bin"
+ExecStart=/home/namin/LeanDojoChatGPT/leanenv/bin/hypercorn -b unix:leandojochatgpt.sock -w 1 -g 33 -m 775 main:app
+
+[Install]
+WantedBy=multi-user.target
