@@ -12,6 +12,8 @@ os.environ["CONTAINER"] = 'docker'
 
 from lean_dojo import *
 
+pwd = os.getcwd()
+
 args_url = "https://github.com/yangky11/lean-example"
 args_commit = "5a0360e49946815cb53132638ccdd46fb1859e2a"
 
@@ -76,14 +78,14 @@ async def run_tactic():
 
 @app.get("/logo.jpg")
 async def plugin_logo():
-    return await quart.send_file("images/logo.jpg", mimetype="image/jpg")
+    return await quart.send_file(f"{pwd}/images/logo.jpg", mimetype="image/jpg")
 
 
 @app.get("/.well-known/ai-plugin.json")
 async def plugin_manifest():
     host = request.headers["Host"]
     s = '' if host == 'localhost' else 's'
-    with open("manifest.json") as f:
+    with open(f"{pwd}/manifest.json") as f:
         text = f.read()
         text = text.replace("PLUGIN_HOSTNAME", f"http{s}://{host}")
         return quart.Response(text, mimetype="text/json")
@@ -93,14 +95,14 @@ async def plugin_manifest():
 async def openapi_spec():
     host = request.headers["Host"]
     s = '' if host == 'localhost' else 's'
-    with open("openapi.yaml") as f:
+    with open(f"{pwd}/openapi.yaml") as f:
         text = f.read()
         text = text.replace("PLUGIN_HOSTNAME", f"http{s}://{host}")
         return quart.Response(text, mimetype="text/yaml")
 
 @app.get("/")
 async def index():
-    with open("index.html") as f:
+    with open(f"{pwd}/index.html") as f:
         text = f.read()
         return quart.Response(text, mimetype="text/html")
 
@@ -116,7 +118,7 @@ def main():
     parser.add_argument("--port", type=int, default=23333)
     args = parser.parse_args()
     logger.info(args)
-
+   
     global repo
     repo = LeanGitRepo(args.url, args.commit)
     assert is_available_in_cache(
